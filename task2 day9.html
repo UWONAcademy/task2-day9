@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 2 - Day 9</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom right, #5cb1a6, #6dc1b5);
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    .section-title {
+      font-size: 20px;
+      margin-top: 30px;
+      margin-bottom: 12px;
+      color: #34495e;
+      border-bottom: 2px solid #4caf91;
+      padding-bottom: 4px;
+    }
+
+    .question {
+      margin-bottom: 25px;
+    }
+
+    .english {
+      font-size: 16px;
+      margin-bottom: 6px;
+      line-height: 1.6;
+    }
+
+    .translation {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"] {
+      width: 120px;
+      padding: 6px;
+      margin: 0 3px;
+      font-size: 15px;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .check-btn {
+      margin-top: 6px;
+      background: #4caf91;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .feedback {
+      margin-top: 6px;
+      font-weight: bold;
+    }
+
+    .correct { color: green; }
+    .incorrect { color: red; }
+
+    @media (max-width: 600px) {
+      input[type="text"] {
+        width: 100px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Task 2 - Day 9</h2>
+
+    <div class="section-title">一. 句子填空（Globalization）</div>
+
+    <div id="q1" class="question"></div>
+    <div id="q2" class="question"></div>
+    <div id="q3" class="question"></div>
+    <div id="q4" class="question"></div>
+  </div>
+
+  <script>
+    const sentences = [
+      {
+        id: "s1",
+        text: "Developing countries face a range of problems. For example, there is a lack of infrastructure, employment, education and good quality housing. Also, food, drinking water and basic medicines are in short supply.",
+        translation: "发展中国家面临很多问题：基础设施、就业、教育、住房、药品短缺。",
+        containerId: "q1"
+      },
+      {
+        id: "s2",
+        text: "The best form of help for developing countries is development aid. To be more specific, richer nations and charities can help by building new houses and schools. Multi-national companies can create jobs in developing countries.",
+        translation: "最好的帮助是发展援助，包括建校、建房、创造就业等。",
+        containerId: "q2"
+      },
+      {
+        id: "s3",
+        text: "From an economic perspective, immigration can be extremely positive. Many immigrants have skills that are needed in the country they move to, so immigrants who find work contribute to the economy of their new country.",
+        translation: "从经济角度看移民很积极，很多人有用武之地，对经济有贡献。",
+        containerId: "q3"
+      },
+      {
+        id: "s4",
+        text: "Tourism can encourage travelers to widen their outlook and to embrace new ideas by providing them with opportunities to interact with other people, lifestyles and cultures.",
+        translation: "旅游可以让旅行者开阔视野、接受新想法。",
+        containerId: "q4"
+      }
+    ];
+
+    function getRandomIndexes(array, min = 5, max = 7) {
+      const count = Math.min(Math.floor(Math.random() * (max - min + 1)) + min, array.length);
+      const set = new Set();
+      while (set.size < count) {
+        const i = Math.floor(Math.random() * array.length);
+        const word = array[i].replace(/[.,()"]/g, '');
+        if (word.length > 2 && !word.includes("'")) set.add(i);
+      }
+      return Array.from(set);
+    }
+
+    function renderSentence({ id, text, translation, containerId }) {
+      const words = text.split(" ");
+      const blanks = getRandomIndexes(words);
+      const answers = {};
+      const html = words.map((word, i) => {
+        const clean = word.replace(/[.,()"]/g, "");
+        const punct = word.match(/[.,()"]$/) ? word.slice(-1) : "";
+        if (blanks.includes(i)) {
+          const inputId = `${id}_${i}`;
+          answers[inputId] = clean.toLowerCase();
+          return `<input type="text" id="${inputId}" placeholder="...">${punct}`;
+        }
+        return word;
+      }).join(" ");
+      document.getElementById(containerId).innerHTML = `
+        <div class="english">${html}</div>
+        <div class="translation">${translation}</div>
+        <button class="check-btn" onclick='checkSentence("${id}", ${JSON.stringify(answers)})'>Check</button>
+        <div class="feedback" id="fb_${id}"></div>
+      `;
+    }
+
+    function checkSentence(id, answers) {
+      const feedback = document.getElementById("fb_" + id);
+      let correct = true;
+      for (const [inputId, expected] of Object.entries(answers)) {
+        const val = document.getElementById(inputId).value.trim().toLowerCase();
+        if (val !== expected) correct = false;
+      }
+      feedback.innerHTML = correct
+        ? `<span class='correct'>✔ 正确！</span>`
+        : `<span class='incorrect'>✘ 有错误</span> 正确答案：${Object.values(answers).join(" / ")}`;
+    }
+
+    // 渲染全部句子
+    sentences.forEach(renderSentence);
+  </script>
+</body>
+</html>
